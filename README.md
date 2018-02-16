@@ -4,7 +4,7 @@ Utilities for working with `serde_json::Map` structures as "dot maps".
 
 ```
 [dependencies]
-dot_json = "0.1"
+dot_json = "0.2"
 ```
 
 ## map_to_dot
