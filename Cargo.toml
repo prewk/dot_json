@@ -1,5 +1,5 @@
 [package]
-name = "dot-json"
+name = "dot_json"
 version = "0.1.0"
 authors = ["Oskar Thornblad <oskar.thornblad@gmail.com>"]
 
