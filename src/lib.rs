@@ -1,4 +1,3 @@
-#[macro_use]
 extern crate serde_json;
 
 use std::string::String;
@@ -48,14 +47,13 @@ fn traverse_dot(src: &Map<String, Value>, dest: &mut Map<String, Value>, inc_pat
 
 /// Create a flat dot map from a deep serde_json::Map
 ///
-/// # Examples
+/// # Example
 ///
 /// ```rust
-/// # #[macro_use]
 /// # extern crate serde_json;
 /// # extern crate dot_json;
 /// use serde_json::{Map, Value, from_str};
-/// # use dot_json::to_dot;
+/// # use dot_json::map_to_dot;
 /// #
 /// # fn main() {
 ///
@@ -67,7 +65,7 @@ fn traverse_dot(src: &Map<String, Value>, dest: &mut Map<String, Value>, inc_pat
 /// let value: Value = from_str(data).unwrap();
 ///
 /// if let Value::Object(map) = value {
-///     let dot_map = to_dot(&map);
+///     let dot_map = map_to_dot(&map);
 ///
 ///     assert_eq!(5, dot_map.len());
 ///     assert_eq!(Some(&Value::String("Lorem ipsum".to_string())), dot_map.get("foo"));
@@ -78,10 +76,86 @@ fn traverse_dot(src: &Map<String, Value>, dest: &mut Map<String, Value>, inc_pat
 /// }
 /// # }
 /// ```
-pub fn to_dot(src: &Map<String, Value>) -> Map<String, Value> {
+pub fn map_to_dot(src: &Map<String, Value>) -> Map<String, Value> {
     let mut dest = Map::new();
 
     traverse_dot(&src, &mut dest, &vec![]);
 
     dest
+}
+
+/// Create a flat dot map from a serde_json::Value::{Array, Object} while just cloning any other value
+///
+/// # Examples
+///
+/// ```rust
+/// # extern crate serde_json;
+/// # extern crate dot_json;
+/// use serde_json::{Map, Value, from_str};
+/// # use dot_json::value_to_dot;
+/// #
+/// # fn main() {
+///
+/// let data = r#"{
+///                 "foo": "Lorem ipsum",
+///                 "bar": [null, 123, true],
+///                 "baz": { "qux": 789 }
+///               }"#;
+/// let value: Value = from_str(data).unwrap();
+///
+/// let dot_map = value_to_dot(&value);
+///
+/// assert_eq!(Value::String("Lorem ipsum".to_string()), dot_map["foo"]);
+/// assert_eq!(Value::Null, dot_map["bar.0"]);
+/// assert_eq!(Value::Number(123.into()), dot_map["bar.1"]);
+/// assert_eq!(Value::Bool(true), dot_map["bar.2"]);
+/// assert_eq!(Value::Number(789.into()), dot_map["baz.qux"]);
+/// # }
+/// ```
+///
+/// ```rust
+/// # extern crate serde_json;
+/// # extern crate dot_json;
+/// use serde_json::{Map, Value, from_str};
+/// # use dot_json::value_to_dot;
+/// #
+/// # fn main() {
+/// assert_eq!(Value::String("Lorem ipsum".to_string()), value_to_dot(&Value::String("Lorem ipsum".to_string())));
+/// assert_eq!(Value::Null, value_to_dot(&Value::Null));
+/// assert_eq!(Value::Number(123.into()), value_to_dot(&Value::Number(123.into())));
+/// assert_eq!(Value::Bool(true), value_to_dot(&Value::Bool(true)));
+///
+/// let dot_map = value_to_dot(&Value::Array(vec![
+///     Value::Bool(true),
+///     Value::Bool(false),
+///     Value::Array(vec![
+///         Value::Number(123.into()),
+///     ]),
+/// ]));
+///
+/// assert_eq!(Value::Bool(true), dot_map["0"]);
+/// assert_eq!(Value::Bool(false), dot_map["1"]);
+/// assert_eq!(Value::Number(123.into()), dot_map["2.0"]);
+/// # }
+/// ```
+pub fn value_to_dot(src: &Value) -> Value {
+    match src {
+        &Value::Array(ref a) => {
+            let mut m = Map::new();
+
+            let mut cnt = 0;
+            for v in a {
+                m.insert(cnt.to_string(), v.clone());
+
+                cnt += 1;
+            }
+
+            Value::Object(map_to_dot(&m))
+        },
+        &Value::Object(ref m) => Value::Object(map_to_dot(m)),
+        &Value::Null => Value::Null,
+        &Value::String(ref s) => Value::String(s.clone()),
+        &Value::Number(ref n) => Value::Number(n.clone()),
+        &Value::Bool(ref b) => Value::Bool(*b),
+    }
 }

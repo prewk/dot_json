@@ -7,7 +7,7 @@ Utilities for working with `serde_json::Map` structures as "dot maps".
 dot_json = "0.1"
 ```
 
-## to_dot
+## map_to_dot
 
 Convert a deep `serde_json::Map` into a shallow dot map, from:
 
@@ -41,7 +41,7 @@ to:
 extern crate dot_json;
 extern crate serde_json;
 
-use dot_json::to_dot;
+use dot_json::map_to_dot;
 use serde_json::{Map, Value, Error};
 
 fn example() -> Result<(), Error> {
@@ -59,7 +59,7 @@ fn example() -> Result<(), Error> {
     let value: Value = serde_json::from_str(data)?;
 
     if let Value::Object(map) = value {
-        let dot_map = to_dot(&map);
+        let dot_map = map_to_dot(&map);
 
         assert_eq!(
             Some(&Value::Bool(false)),
@@ -70,3 +70,11 @@ fn example() -> Result<(), Error> {
     Ok(())
 }
 ```
+
+## value_to_dot
+
+Convert a `serde_json::Value` into a shallow dot map, if possible, otherwise clone:
+
+* `Value::Array -> Value::Object` Array gets converted into a map where keys are indices, and is then run through `map_to_dot`
+* `Value::Object -> Value::Object` Is run through `map_to_dot`
+* Other values: No change - gets cloned
