@@ -150,6 +150,7 @@ pub fn arr_to_dot_map(src: &Vec<Value>) -> Map<String, Value> {
 /// # use dot_json::value_to_dot;
 /// #
 /// # fn main() {
+///
 /// assert_eq!(Value::String("Lorem ipsum".to_string()), value_to_dot(&Value::String("Lorem ipsum".to_string())));
 /// assert_eq!(Value::Null, value_to_dot(&Value::Null));
 /// assert_eq!(Value::Number(123.into()), value_to_dot(&Value::Number(123.into())));
