@@ -35,7 +35,7 @@ fn traverse_dot(src: &Map<String, Value>, dest: &mut Map<String, Value>, inc_pat
     }
 }
 
-/// Create a flat dot map from a deep serde_json::Map
+/// Create a flat dot map from a deep `serde_json::Map`
 ///
 /// # Example
 ///
@@ -74,7 +74,7 @@ pub fn map_to_dot_map(src: &Map<String, Value>) -> Map<String, Value> {
     dest
 }
 
-/// Create a flat dot map from a deep Vec<serde_json::Value>
+/// Create a flat dot map from a deep `Vec<serde_json::Value>`
 ///
 /// # Example
 ///
