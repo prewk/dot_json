@@ -1,4 +1,4 @@
-# dot_json
+# dot\_json
 
 Utilities for working with `serde_json::Map` structures as "dot maps".
 
@@ -7,74 +7,60 @@ Utilities for working with `serde_json::Map` structures as "dot maps".
 dot_json = "0.2"
 ```
 
-## map_to_dot
+## value\_to\_dot
 
-Convert a deep `serde_json::Map` into a shallow dot map, from:
-
-```json
-{
-    "foo": "Lorem ipsum",
-    "bar": [123, null, { "baz": "Dolor sit amet" }],
-    "qux": {
-        "deep": {
-            "one": true,
-            "two": false,
-        }
-    }
-}
-```
-
-to:
-
-```json
-{
-    "foo": "Lorem ipsum",
-    "bar.0": 123,
-    "bar.1": null,
-    "bar.2.baz": "Dolor sit amet",
-    "qux.deep.one": true,
-    "qux.deep.two": false
-}
-```
+See also: [https://github.com/serde-rs/json#constructing-json-values](https://github.com/serde-rs/json#constructing-json-values)
 
 ```rust
-extern crate dot_json;
+#[macro_use]
 extern crate serde_json;
+extern crate dot_json;
 
-use dot_json::map_to_dot;
-use serde_json::{Map, Value, Error};
+use dot_json::value_to_dot;
+use serde_json::{Map, Value};
 
-fn example() -> Result<(), Error> {
-    let data = r#"{
-                      "foo": "Lorem ipsum",
-                      "bar": [123, null, { "baz": "Dolor sit amet" }],
-                      "qux": {
-                          "deep": {
-                              "one": true,
-                              "two": false,
-                          }
-                      }
-                  }"#;
-
-    let value: Value = serde_json::from_str(data)?;
-
-    if let Value::Object(map) = value {
-        let dot_map = map_to_dot(&map);
-
-        assert_eq!(
-            Some(&Value::Bool(false)),
-            dot_map.get("qux.deep.two")
-        );
-    }
-
-    Ok(())
+fn main() {
+	let obj = json!({
+		"foo": "Lorem ipsum",
+		"bar": [123, null, { "baz": "Dolor sit amet" }],
+		"qux": {
+			"deep": {
+				"one": true,
+				"two": false,
+			}
+		}
+	});
+		
+	let obj_dot = value_to_dot(&obj);
+	
+	// obj_dot is now: {
+	//     "foo": "Lorem ipsum",
+	//     "bar.0": 123,
+	//     "bar.1": null,
+	//     "bar.2.baz": "Dolor sit amet",
+	//     "qux.deep.one": true,
+	//     "qux.deep.two": false
+	// }
+		
+	assert_eq!(Value::Null, obj_dot["bar.1"]);
+	assert_eq!(Value::Bool(false), obj_dot["qux.deep.two"]);
+		
+	let arr = json!([
+		{ "foo", false },
+		null
+	]);
+		
+	let arr_dot = value_to_dot(&arr);
+		
+	assert_eq!(Value::Bool(false), arr["0.foo"]);
+	assert_eq!(Value::Null, arr["1"]);
 }
 ```
 
-## value_to_dot
+## map\_to\_dot\_map
 
-Convert a `serde_json::Value` into a shallow dot map, if possible, otherwise clone:
+Used by `value_to_dot` and `arr_to_dot_map` to convert deep `serde_json::Map` to shallow dot maps.
 
-* `Value::Array -> Value::Object` Array gets converted into a map where keys are indices, and is then run through `map_to_dot`
-* `Value::Object -> Value::Object` Is run through `map_to_dot`
-* Other values: No change - gets cloned
+## arr\_to\_dot\_map
+
+Used by `value_to_dot` to convert deep `serde_json::Value::Array` vectors to shallow dot maps.
