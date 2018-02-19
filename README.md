@@ -1,4 +1,4 @@
-# dot\_json
+# dot\_json [![Build Status](https://travis-ci.org/prewk/dot_json.svg?branch=master)](https://travis-ci.org/prewk/dot_json)
 
 Utilities for working with `serde_json::Map` structures as "dot maps".
 
