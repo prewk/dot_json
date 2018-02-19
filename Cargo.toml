@@ -1,7 +1,14 @@
 [package]
 name = "dot_json"
+description="Tools for dot map representations of serde_json Maps"
 version = "0.2.0"
 authors = ["Oskar Thornblad <oskar.thornblad@gmail.com>"]
+repository="github.com/prewk/dot_json"
+homepage="https://oskarthornblad.se"
+readme="README.md"
+keywords = ["dot", "json"]
+categories = ["data-structures"]
+license = "MIT"
 
 [dependencies]
 serde_json = "1.0"
